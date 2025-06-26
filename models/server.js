@@ -1,18 +1,26 @@
 const express = require('express');
 const cors = require('cors');
+const { dbConnection } = require('../database/config');
+
+
 
 class Server {
 
     constructor() {
-        this.app = express();
+           this.app = express();
         this.port = process.env.PORT;
+        this.usuariosPath = '/api/usuarios';
+        //llamada a conectarDB
+        this.conectarDB();
         //Middelware
         this.middlewares();
         //Rutas de la aplicacion
         this.routes();
+
     }
-
-
+    async conectarDB() {
+        await dbConnection();
+    }
 
     routes() {
         this.app.get('/api',  (req, res) => {
@@ -28,8 +36,10 @@ class Server {
         });
 
         this.app.post('/api',  (req, res) => {
+            const body = req.body;
             res.json({
-                msg: 'post API'
+                msg: 'post API',
+                body
             });
         });
 
@@ -38,6 +48,9 @@ class Server {
                 msg: 'delete API'
             });
         });
+
+        // Montar las rutas de usuarios
+        this.app.use(this.usuariosPath, require('../routes/usuarios'));
 
     }
 
